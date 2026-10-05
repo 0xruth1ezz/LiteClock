@@ -1,8 +1,9 @@
 # Convert the generated PNG into a standard multi-resolution Windows ICO.
 # Small entries use 32-bit DIBs for Windows shell compatibility; 256 uses PNG.
 $ErrorActionPreference = 'Stop'
+$clockAssets = Join-Path (Split-Path $PSScriptRoot -Parent) 'src/LiteClock/Assets'
 Add-Type -AssemblyName System.Drawing
-$clockMaster = [Drawing.Bitmap]::FromFile((Join-Path $PSScriptRoot 'LiteClock.png'))
+$clockMaster = [Drawing.Bitmap]::FromFile((Join-Path $clockAssets 'LiteClock.png'))
 $clockSizes = @(16,20,24,32,40,48,64,128,256)
 $clockFrames = [Collections.Generic.List[byte[]]]::new()
 try {
@@ -52,7 +53,7 @@ try {
             $clockFrames.Add($clockBuffer.ToArray()); $clockBuffer.Dispose()
         } finally { $clockGraphics.Dispose(); $clockBitmap.Dispose() }
     }
-    $clockFile = [IO.File]::Create((Join-Path $PSScriptRoot 'LiteClock.ico'))
+    $clockFile = [IO.File]::Create((Join-Path $clockAssets 'LiteClock.ico'))
     $clockWriter = [IO.BinaryWriter]::new($clockFile)
     try {
         $clockWriter.Write([uint16]0); $clockWriter.Write([uint16]1); $clockWriter.Write([uint16]$clockSizes.Count)

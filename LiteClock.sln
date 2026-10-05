@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B3BE3F3-63DE-413C-AA81-117C704072BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiteClock", "src\LiteClock\LiteClock.csproj", "{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|ARM64 = Debug|ARM64
+		Release|x64 = Release|x64
+		Release|ARM64 = Release|ARM64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Debug|x64.ActiveCfg = Debug|x64
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Debug|x64.Build.0 = Debug|x64
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Debug|ARM64.Build.0 = Debug|ARM64
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Release|x64.ActiveCfg = Release|x64
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Release|x64.Build.0 = Release|x64
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Release|ARM64.ActiveCfg = Release|ARM64
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C}.Release|ARM64.Build.0 = Release|ARM64
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BC8A21EF-5946-40C6-9E40-67FD31F32F3C} = {9B3BE3F3-63DE-413C-AA81-117C704072BE}
+	EndGlobalSection
+EndGlobal

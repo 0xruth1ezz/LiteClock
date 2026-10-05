@@ -51,16 +51,17 @@
 
 源码和构建
 全部界面使用 WinUI 3 / Windows App SDK 1.8，C# / .NET 8 实现，无 WPF 或 WinForms 依赖。
-build.ps1 使用 .NET SDK 编译并发布到 dist\LiteClock-x64；首次构建需要网络还原 NuGet 包。
+scripts\build.ps1 使用 .NET SDK 编译并发布到 dist\LiteClock-x64；首次构建需要网络还原 NuGet 包。
+源码位于 src\LiteClock，按控件、窗口、模型、服务、取色功能和系统集成分组。根目录 LiteClock.sln 可直接打开工程。
 构建要求 Windows 10 2004（19041）或更新版本和 .NET 8 SDK（或更新版本）。
 发布目录包含运行时依赖；运行用户不需要单独安装 .NET 或 Windows App Runtime，不能仅复制 EXE。
 首次构建会复制项目原有 settings.json 到发布目录，后续构建不会覆盖发布目录中的配置。
 原有版本与新版使用相同默认单实例标识；迁移时先退出旧版，再启动新版。
 如需自动启动，请在新版重新开启对应选项，将登录启动路径更新到发布目录。
-图标文件必须与发布的 EXE 一起保留。build-icon.ps1 可以从 PNG 重新生成 ICO。
+图标文件必须与发布的 EXE 一起保留。scripts\build-icon.ps1 可以从 src\LiteClock\Assets 中的 PNG 重新生成 ICO。
 命令行：--settings 打开设置；--exit 退出当前配置目录的实例。
 --settings-dir <目录> 可指定独立配置目录，同一目录共享一个实例。
 --self-test <结果文本路径> 执行日期、时区和配置测试。
-tests\run-tests.ps1 执行全部回归测试；tests\run-number-tests.ps1 执行数字规则和真实 WinUI 控件测试。
+scripts\run-tests.ps1 执行全部回归测试；scripts\run-number-tests.ps1 执行数字规则和真实 WinUI 控件测试；结果保存在 artifacts\tests。
 UI 测试使用独立配置目录，需要登录后的交互式桌面。
 错误信息保存在配置目录 LiteClock.log，日志有大小上限。

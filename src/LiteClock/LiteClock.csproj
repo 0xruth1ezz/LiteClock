@@ -15,11 +15,10 @@
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <SelfContained>true</SelfContained>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>LiteClock.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\LiteClock.ico</ApplicationIcon>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <EnableDefaultPageItems>false</EnableDefaultPageItems>
     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
   </PropertyGroup>
@@ -30,10 +29,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4654" />
-    <Compile Include="*.cs" />
-    <Compile Include="tests\*.cs" />
+    <!-- These tests run inside the app so UI checks use a real WinUI dispatcher. -->
+    <Compile Include="..\..\tests\**\*.cs" Exclude="..\..\tests\**\bin\**;..\..\tests\**\obj\**" Link="Tests\%(RecursiveDir)%(Filename)%(Extension)" />
     <ApplicationDefinition Include="App.xaml" />
-    <Content Include="LiteClock.ico" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="LiteClock.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Keep runtime asset paths stable while grouping source assets together. -->
+    <Content Include="Assets\LiteClock.ico" Link="LiteClock.ico" TargetPath="LiteClock.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\LiteClock.png" Link="LiteClock.png" TargetPath="LiteClock.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

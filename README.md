@@ -30,22 +30,22 @@
 构建需要 Windows 10 2004（19041）或更新版本、.NET 8 SDK（或更新版本）以及首次还原 NuGet 依赖所需的网络连接。无需 Visual Studio；SDK、WinUI 和构建工具版本由工程固定。
 
 ```powershell
-.\build.ps1
+.\scripts\build.ps1
 .\dist\LiteClock-x64\LiteClock.exe
 ```
 
 默认发布 x64 非 MSIX、自包含版本，将 .NET 和 Windows App SDK 运行时一起放在 `dist\LiteClock-x64`。分发时复制整个目录，不能只复制 EXE。运行用户不需要单独安装 .NET 或 Windows App Runtime。部署配置参考 [Windows App SDK 自包含部署文档](https://learn.microsoft.com/windows/apps/package-and-deploy/self-contained-deploy/deploy-self-contained-apps)。
 
 ```powershell
-.\build.ps1 -NoPublish             # 仅编译
-.\build.ps1 -Platform ARM64        # ARM64 发布，需在 ARM64 Windows 上运行验证
+.\scripts\build.ps1 -NoPublish       # 仅编译
+.\scripts\build.ps1 -Platform ARM64  # ARM64 发布，需在 ARM64 Windows 上运行验证
 .\dist\LiteClock-x64\LiteClock.exe --settings
 .\dist\LiteClock-x64\LiteClock.exe --exit
 ```
 
 构建脚本可使用 PATH 中的 `dotnet`，也支持项目本地 `.tools\dotnet\dotnet.exe`。重新发布前先退出该发布目录中的时钟。
 
-应用版本统一在 `LiteClock.csproj` 的 `Version` 中维护，标题栏和“应用信息”页读取构建后的程序集版本。
+应用版本统一在 `src/LiteClock/LiteClock.csproj` 的 `Version` 中维护，标题栏和“应用信息”页读取构建后的程序集版本。也可以直接打开根目录的 `LiteClock.sln`。
 
 首次发布会将仓库目录已有的 `settings.json` 复制到发布目录；再次发布不会覆盖发布目录的个人配置。通常配置保存在 EXE 旁边，再次运行打开同一个实例的设置。迁移时先退出旧版，再启动新版；原有开机启动路径需在新版设置中重新启用。
 
@@ -54,26 +54,46 @@
 ## 测试
 
 ```powershell
-.\build.ps1
-.\tests\run-tests.ps1
+.\scripts\build.ps1
+.\scripts\run-tests.ps1
 ```
 
 测试包括日期边界、时区／夏令时、JSON 兼容和恢复、全部数字规则、实际加载的 NumberBox 模板与原生增减按钮、输入中的无效草稿、小数精度、WinUI 多行换行符、六个设置页面及取消恢复、日历窗口生命周期，以及真实屏幕像素采样、取色取消恢复、边框开关与置顶切换后的四边像素检查。UI 测试需要已登录的交互式桌面，使用独立配置和实例，不覆盖日常设置。
 
-`tests\run-number-tests.ps1` 可单独执行数字及 WinUI 控件测试；结果写在 `tests\*-results.txt`。混合 DPI、多显示器热插拔、不同 Windows 版本及长时间运行仍需在相应设备验证。
+`scripts\run-number-tests.ps1` 可单独执行数字及 WinUI 控件测试；报告与临时配置统一写在 `artifacts/tests/`。混合 DPI、多显示器热插拔、不同 Windows 版本及长时间运行仍需在相应设备验证。
 
-## 源码
+## 目录结构
 
-- `LiteClock.csproj`、`App.xaml`：WinUI 3 工程与主题资源。
-- `LiteClock.cs`：应用生命周期、托盘菜单、日历、单实例与命令行。
-- `ClockWindow.cs`、`ClockView.cs`：桌面窗口行为与共享 XAML 渲染组件。
-- `SettingsWindow.cs`：原生设置控件、实时预览与导入导出。
-- `AppDetails.cs`：统一的版本、窗口标题与应用信息。
-- `Settings.cs`、`NumberRules.cs`、`NumberInput.cs`：配置、格式和数字输入。
-- `Native.cs`：必要的 Windows 桌面互操作与透明背景。
-- `ScreenColorPicker.cs`、`ScreenPixels.cs`：WinUI 屏幕取色覆盖窗口、放大预览和物理像素采样。
-- `SelfTests.cs`、`tests`：回归测试及运行脚本。
-- `LiteClock.png`、`LiteClock.ico`：应用图标；`build-icon.ps1` 可重新生成 ICO。
-- [使用说明](使用说明.txt)：完整操作说明。
+```text
+LiteClock.sln
+src/LiteClock/
+  LiteClock.csproj       # 项目与版本配置
+  App.xaml              # WinUI 主题资源
+  App.xaml.cs           # 应用生命周期与窗口协调
+  Program.cs            # 命令行与单实例入口
+  AppDetails.cs         # 版本与应用信息
+  Assets/               # PNG、ICO 图标
+  Controls/             # 时钟视图、数字输入与步进规则
+  Windows/              # 桌面时钟窗口、设置窗口
+  Models/               # Settings、LineStyle 配置模型
+  Services/             # 配置存储、日期时间格式化
+  Features/
+    ScreenColorPicking/ # 屏幕取色窗口与像素采样
+  Interop/              # Win32、透明背景、系统托盘
+tests/
+  Core/                 # 日期、时区、配置读写测试
+  UI/                   # WinUI 控件、边框、取色测试
+scripts/                # 构建、图标生成与测试入口
+docs/                   # 使用说明与图标设计说明
+dist/                   # 本地发布输出（不提交）
+artifacts/              # 发布包、测试报告与临时配置（不提交）
+```
+
+测试源码保持独立目录，由应用项目链接编译，以便通过 `--self-test` 和 `--ui-test` 在真实的 WinUI 运行环境中执行。新增源码放入对应职责目录即可，项目自动收集 `.cs` 文件。
+
+图标源文件位于 `src/LiteClock/Assets/`，使用 `scripts/build-icon.ps1` 可从 PNG 生成 ICO。发布后图标仍位于 EXE 旁边，保持桌面快捷方式和资源加载路径稳定。
+
+- [使用说明](docs/使用说明.txt)
+- [图标设计说明](docs/图标设计说明.txt)
 
 本项目独立于 ElevenClock，使用 Windows 系统时间，不提供独立的网络对时服务。

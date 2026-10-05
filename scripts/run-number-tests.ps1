@@ -1,12 +1,12 @@
 param(
-    [string]$ResultPath = (Join-Path $PSScriptRoot 'number-input-results.txt'),
+    [string]$ResultPath = (Join-Path (Split-Path $PSScriptRoot -Parent) 'artifacts/tests/number-input-results.txt'),
     [string]$ExePath = (Join-Path (Split-Path $PSScriptRoot -Parent) 'dist/LiteClock-x64/LiteClock.exe')
 )
 $ErrorActionPreference = 'Stop'
-if (-not (Test-Path -LiteralPath $ExePath)) { throw '请先运行 .\build.ps1。' }
+if (-not (Test-Path -LiteralPath $ExePath)) { throw '请先运行 .\scripts\build.ps1。' }
 $clockResult = [IO.Path]::GetFullPath($ResultPath)
 New-Item -ItemType Directory -Force ([IO.Path]::GetDirectoryName($clockResult)) | Out-Null
-$clockProfile = Join-Path $PSScriptRoot ('bin/profile-' + [Guid]::NewGuid().ToString('N'))
+$clockProfile = Join-Path (Split-Path $PSScriptRoot -Parent) ('artifacts/tests/profiles/' + [Guid]::NewGuid().ToString('N'))
 $clockTestArgs = '--ui-test "' + $clockResult + '" --settings-dir "' + $clockProfile + '"'
 $clockTest = Start-Process -FilePath $ExePath -ArgumentList $clockTestArgs -WindowStyle Hidden -PassThru
 if (-not $clockTest.WaitForExit(60000)) {
