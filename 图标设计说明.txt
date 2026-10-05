@@ -1,0 +1,11 @@
+轻时钟高清图标
+生成方式：内置 image_gen 工具（生成后精修透明边缘）。
+最终 PNG 保留工具原始尺寸，不作放大。
+
+首次生成提示词
+Use case: logo-brand. Asset type: high-resolution Windows desktop application icon for LiteClock (轻时钟), a lightweight customizable clock whose current interface uses pale ice-blue #D1EAF2 and deep ink-teal. Create ONE finished icon, square 2048×2048 composition, genuinely transparent outside the icon silhouette. Design: a generous softly rounded square tile in pale icy cyan, with subtle premium satin dimensional shading, completely front-facing and geometrically balanced. Center a bold deep ink-teal circular clock ring and two simple thick rounded clock hands at approximately ten past ten, meeting at a small clean center hub. The symbol is confidently simple, friendly, calm and exceptionally readable when reduced to 16 or 24 pixels. Ring and hands must be broad and high contrast; clock occupies most of the tile with carefully balanced margins. At high resolution the tile may have a restrained soft bevel and beautiful subtle light, but keep the symbol essentially flat and crisp, with almost no external shadow. Only one tile, no backdrop. No text, no letters, no numerals, no tick marks, no decorative sparkles, no extra badges, no complicated details, no mockup scene, no watermark. Transparent outer corners must be genuine alpha, not a checkerboard illustration. Keep the tile nearly filling the canvas, approximately 90–94 percent, with consistent small transparent margins. This is the final production icon, not an icon presentation board.
+
+最终编辑提示词
+Use case: precise-object-edit. This image is the edit target for a finished LiteClock Windows app icon. Preserve its composition, ice-blue rounded square tile, dark teal circular ring, thick rounded two hands and center hub, gentle satin bevel, and clean front-facing look. Change ONLY the outer alpha silhouette: make the outside of the rounded-square tile perfectly clean fully transparent with a smooth antialiased boundary, no detached pixels, no speckles, no wispy residues, no white or cyan fringes, and no cast shadow. Use generous even transparent margin about 6 percent on each side so no edge touches the canvas. Keep the inner clock mark and the existing colors unchanged. Deliver a high-resolution square transparent PNG, ideally 2048×2048. No text or extra elements.
+
+Windows ICO 仅作格式转换和多尺寸缩小，保留原始图像的透明度。

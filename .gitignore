@@ -1,0 +1,30 @@
+# Build and test output
+**/bin/
+**/obj/
+*.exe
+*.dll
+*.pdb
+*.zip
+/dist/
+/artifacts/
+/outputs/
+/work/
+/tests/*-results.txt
+/self-test*.txt
+
+# Local clock settings, backups and logs
+/settings.json
+/settings.json.*
+*.bak
+*.log
+*.log.*
+*.tmp
+
+# Local editor and OS files
+.vs/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+Desktop.ini
