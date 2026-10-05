@@ -1,11 +1,28 @@
+param(
+    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Release',
+    [ValidateSet('x64', 'ARM64')][string]$Platform = 'x64',
+    [switch]$NoPublish
+)
 $ErrorActionPreference = 'Stop'
-$clockFramework = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319'
-$clockReferences = @('System.dll','System.Core.dll','System.Drawing.dll','System.Windows.Forms.dll','System.Web.Extensions.dll','System.Xaml.dll','WPF\WindowsBase.dll','WPF\PresentationCore.dll','WPF\PresentationFramework.dll','WPF\UIAutomationProvider.dll','WPF\UIAutomationTypes.dll')
-$clockArgs = @('/nologo','/target:winexe','/platform:anycpu','/optimize+','/codepage:65001',('/win32manifest:' + (Join-Path $PSScriptRoot 'app.manifest')),('/out:' + (Join-Path $PSScriptRoot 'LiteClock.exe')))
-$clockArgs += '/win32icon:' + (Join-Path $PSScriptRoot 'LiteClock.ico')
-$clockArgs += '/resource:' + (Join-Path $PSScriptRoot 'LiteClock.ico') + ',LiteClock.AppIcon'
-foreach ($clockReference in $clockReferences) { $clockArgs += '/reference:' + (Join-Path $clockFramework $clockReference) }
-$clockArgs += (Get-ChildItem -LiteralPath $PSScriptRoot -Filter '*.cs').FullName
-& (Join-Path $clockFramework 'csc.exe') @clockArgs
-if ($LASTEXITCODE -ne 0) { throw 'LiteClock build failed.' }
-Write-Output 'Built LiteClock.exe'
+$clockSdk = Get-Command dotnet -ErrorAction SilentlyContinue
+$clockDotnet = if ($clockSdk) { $clockSdk.Source } else { Join-Path $PSScriptRoot '.tools/dotnet/dotnet.exe' }
+if (-not (Test-Path -LiteralPath $clockDotnet)) {
+    throw '请先安装 .NET 8 SDK（或更新版本），然后重新运行 build.ps1。https://dotnet.microsoft.com/download/dotnet/8.0'
+}
+$clockProject = Join-Path $PSScriptRoot 'LiteClock.csproj'
+if ($NoPublish) {
+    & $clockDotnet build $clockProject -c $Configuration "-p:Platform=$Platform"
+} else {
+    $clockOutput = Join-Path $PSScriptRoot "dist/LiteClock-$Platform"
+    & $clockDotnet publish $clockProject -c $Configuration "-p:Platform=$Platform" -o $clockOutput
+}
+if ($LASTEXITCODE -ne 0) { throw 'LiteClock WinUI 3 build failed.' }
+if (-not $NoPublish) {
+    # Import a legacy profile only on the first build. Never replace a newer profile.
+    $clockProfile = Join-Path $PSScriptRoot 'settings.json'
+    $clockPublishedProfile = Join-Path $clockOutput 'settings.json'
+    if ((Test-Path -LiteralPath $clockProfile) -and -not (Test-Path -LiteralPath $clockPublishedProfile)) {
+        Copy-Item -LiteralPath $clockProfile -Destination $clockPublishedProfile
+    }
+    Write-Output ("Built WinUI 3 app: " + (Join-Path $clockOutput 'LiteClock.exe'))
+}

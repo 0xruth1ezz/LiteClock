@@ -8,7 +8,7 @@ using LiteClock;
 static class NumberInputTests
 {
     [STAThread]
-    static int Main(string[] args)
+    public static int Run(string report)
     {
         var results = new List<string>();
         Action<bool, string> check = delegate(bool passed, string name) { if (!passed) throw new Exception("FAIL: " + name); results.Add("PASS: " + name); };
@@ -47,8 +47,8 @@ static class NumberInputTests
             try { input.ReadValue(); } catch (ArgumentException) { invalid = true; }
             check(invalid && input.Text == "-", "invalid drafts are retained without becoming persisted values");
             results.Add("ALL NUMBER INPUT TESTS PASSED");
-            File.WriteAllLines(args[0], results); return 0;
+            File.WriteAllLines(report, results); return 0;
         }
-        catch (Exception ex) { results.Add(ex.ToString()); File.WriteAllLines(args[0], results); return 1; }
+        catch (Exception ex) { results.Add(ex.ToString()); File.WriteAllLines(report, results); return 1; }
     }
 }

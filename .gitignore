@@ -9,6 +9,7 @@
 /artifacts/
 /outputs/
 /work/
+/.tools/
 /tests/*-results.txt
 /self-test*.txt
 

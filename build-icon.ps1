@@ -1,5 +1,5 @@
 # Convert the generated PNG into a standard multi-resolution Windows ICO.
-# Small entries use 32-bit DIBs for WinForms compatibility; 256 uses PNG.
+# Small entries use 32-bit DIBs for Windows shell compatibility; 256 uses PNG.
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 $clockMaster = [Drawing.Bitmap]::FromFile((Join-Path $PSScriptRoot 'LiteClock.png'))
