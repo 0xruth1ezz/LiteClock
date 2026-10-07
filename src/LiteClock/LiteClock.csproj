@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Product>轻时钟 LiteClock</Product>
     <Description>轻量、可自定义的 Windows 桌面时钟。</Description>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>

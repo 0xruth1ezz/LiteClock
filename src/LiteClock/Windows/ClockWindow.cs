@@ -11,14 +11,16 @@ namespace LiteClock;
 public sealed class ClockWindow : Window
 {
     readonly ClockApp app;
-    readonly DispatcherTimer timer = new(), clickTimer = new();
+    readonly DispatcherTimer timer = new(), clickTimer = new(), windowTimer = new();
     readonly Native.SubclassProc hook;
+    readonly Native.WinEventProc foregroundChanged;
+    readonly IntPtr foregroundHook;
     readonly IntPtr hwnd;
-    bool draggingWidth, draggingPosition, suppressClick, hidden, stopped;
+    bool draggingWidth, draggingPosition, suppressClick, hidden, stopped, windowUpdateQueued;
     Native.Point dragOrigin, lastClickPoint;
     Settings dragSettings;
     double scale = 1;
-    DateTime lastPress = DateTime.MinValue, lastPosition = DateTime.MinValue;
+    DateTime lastPress = DateTime.MinValue;
     Native.Rect bounds;
     public Settings Config { get; private set; }
     public ClockView View { get; } = new();
@@ -30,19 +32,27 @@ public sealed class ClockWindow : Window
         SystemBackdrop = new TransparentBackdrop();
         Native.ToolWindow(this); Native.Icon(this);
         hwnd = Native.Handle(this);
+        Native.ExcludeFromPeek(hwnd);
         Native.SetWindowLong(hwnd, -20, Native.GetWindowLong(hwnd, -20) | 0x08000000);
         hook = Hook; Native.SetWindowSubclass(hwnd, hook, (UIntPtr)1, IntPtr.Zero);
-        View.ContextFlyout = app.CreateMenu();
+        View.ContextFlyout = app.CreateMenu(this);
         View.PointerPressed += BeginDrag;
         View.PointerMoved += DuringDrag;
         View.PointerReleased += EndDrag;
         View.PointerCaptureLost += (_, _) => FinishDrag();
         View.PointerCanceled += (_, _) => FinishDrag();
         timer.Tick += (_, _) => Tick();
+        // Time formatting can refresh as slowly as once a minute. Window visibility
+        // must respond to Show Desktop and foreground changes independently.
+        foregroundChanged = (_, _, _, _, _, _, _) => QueueWindowUpdate();
+        foregroundHook = Native.SetWinEventHook(3, 3, IntPtr.Zero, foregroundChanged, 0, 0, 0); // EVENT_SYSTEM_FOREGROUND, WINEVENT_OUTOFCONTEXT
+        if (foregroundHook == IntPtr.Zero) Store.Log(new InvalidOperationException("Could not observe foreground changes; using the window timer."));
+        windowTimer.Interval = TimeSpan.FromSeconds(1);
+        windowTimer.Tick += (_, _) => UpdateWindowState();
         clickTimer.Interval = TimeSpan.FromMilliseconds(Native.GetDoubleClickTime());
         clickTimer.Tick += (_, _) => { clickTimer.Stop(); DoAction(Config.ClickAction); };
         Closed += (_, _) => { Stop(); if (!app.IsShuttingDown) app.Shutdown(); };
-        Apply(settings); timer.Start();
+        Apply(settings); timer.Start(); windowTimer.Start();
     }
     IntPtr Hook(IntPtr window, uint message, IntPtr wParam, IntPtr lParam, UIntPtr id, IntPtr data)
     {
@@ -63,7 +73,9 @@ public sealed class ClockWindow : Window
         // The transparent composition backdrop continues to supply per-pixel alpha.
         Native.SetWindowLong(hwnd, -20, Config.ClickThrough ? style | 0x80000 | 0x20 : style & ~(0x80000 | 0x20));
         if (Config.ClickThrough) Native.SetLayeredWindowAttributes(hwnd, 0, 255, 2);
-        PositionClock(); ConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        PositionClock();
+        if (windowTimer.IsEnabled) UpdateWindowState();
+        ConfigurationChanged?.Invoke(this, EventArgs.Empty);
     }
     public void PositionClock()
     {
@@ -78,8 +90,20 @@ public sealed class ClockWindow : Window
     void Tick()
     {
         var now = DateTime.UtcNow; View.UpdateTime(now); TimeChanged?.Invoke(this, EventArgs.Empty);
-        if ((now - lastPosition).TotalSeconds < 1) return;
-        lastPosition = now;
+    }
+    void QueueWindowUpdate()
+    {
+        if (stopped || windowUpdateQueued) return;
+        windowUpdateQueued = true;
+        if (!DispatcherQueue.TryEnqueue(() =>
+        {
+            windowUpdateQueued = false;
+            UpdateWindowState();
+        })) windowUpdateQueued = false;
+    }
+    void UpdateWindowState()
+    {
+        if (stopped || Config == null) return;
         bool hide = Config.HideFullscreen && app.Editor == null && !draggingPosition && !draggingWidth && Native.IsFullscreen(hwnd, bounds);
         if (hide != hidden)
         {
@@ -165,6 +189,8 @@ public sealed class ClockWindow : Window
     public void Stop()
     {
         if (stopped) return; stopped = true;
-        timer.Stop(); clickTimer.Stop(); Native.RemoveWindowSubclass(hwnd, hook, (UIntPtr)1);
+        timer.Stop(); clickTimer.Stop(); windowTimer.Stop();
+        if (foregroundHook != IntPtr.Zero) Native.UnhookWinEvent(foregroundHook);
+        Native.RemoveWindowSubclass(hwnd, hook, (UIntPtr)1);
     }
 }

@@ -47,7 +47,6 @@ public sealed class ClockView : Grid
         surface.CornerRadius = new CornerRadius(config.Radius);
         surface.BorderThickness = new Thickness(config.BorderWidth);
         surface.BorderBrush = ColorBrush(config.BorderColor, config.BorderOpacity);
-        ToolTipService.SetToolTip(this, config.TooltipEnabled ? config.Tooltip : null);
         for (int i = 0; i < labels.Count; i++)
         {
             var style = config.Lines[i]; var label = labels[i];

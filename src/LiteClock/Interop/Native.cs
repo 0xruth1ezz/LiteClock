@@ -37,6 +37,9 @@ public static class Native
     }
     delegate bool MonitorCallback(IntPtr monitor, IntPtr dc, ref Rect bounds, IntPtr data);
     public delegate IntPtr SubclassProc(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam, UIntPtr id, IntPtr data);
+    public delegate void WinEventProc(IntPtr hook, uint eventType, IntPtr hwnd, int objectId, int childId, uint threadId, uint time);
+    [DllImport("user32.dll")] public static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr module, WinEventProc callback, uint processId, uint threadId, uint flags);
+    [DllImport("user32.dll")] public static extern bool UnhookWinEvent(IntPtr hook);
     [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr window, out Rect rect);
     [DllImport("user32.dll")] public static extern bool GetCursorPos(out Point point);
@@ -84,6 +87,12 @@ public static class Native
         return GetWindowRect(window, out var rect) && rect.Left <= screen.Left && rect.Top <= screen.Top && rect.Right >= screen.Right && rect.Bottom >= screen.Bottom;
     }
     public static IntPtr Handle(Window window) => WinRT.Interop.WindowNative.GetWindowHandle(window);
+    public static void ExcludeFromPeek(IntPtr window)
+    {
+        // Desktop widgets should remain visible during the shell's Peek animation.
+        uint enabled = 1;
+        Marshal.ThrowExceptionForHR(DwmSetWindowAttribute(window, 12, ref enabled, sizeof(uint))); // DWMWA_EXCLUDED_FROM_PEEK
+    }
     public static void Icon(Window window) => window.AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "LiteClock.ico"));
     public static void Center(Window window, int width, int height)
     {

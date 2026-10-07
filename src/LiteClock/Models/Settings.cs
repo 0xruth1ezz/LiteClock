@@ -46,8 +46,6 @@ public sealed class Settings
     public string HoverForeground { get; set; }
     public bool AlwaysOnTop { get; set; }
     public bool ClickThrough { get; set; }
-    public bool TooltipEnabled { get; set; }
-    public string Tooltip { get; set; }
     public string ClickAction { get; set; }
     public string DoubleClickAction { get; set; }
     public string MiddleClickAction { get; set; }
@@ -65,8 +63,7 @@ public sealed class Settings
         Alignment = "Center"; Vertical = "Center"; PaddingLeft = PaddingRight = 2;
         BorderColor = "#7BA5B4"; BorderOpacity = TextOpacity = WindowOpacity = 100;
         HoverBackground = "#BFE0EA"; HoverForeground = "#000000";
-        AlwaysOnTop = TooltipEnabled = true;
-        Tooltip = "拖动左边缘调整宽度\nShift + 拖动：移动位置\n双击或右键：设置";
+        AlwaysOnTop = true;
         ClickAction = "None"; DoubleClickAction = "Settings"; MiddleClickAction = "Copy";
         RefreshMilliseconds = 250; TimeZone = "Local";
         Lines = Enumerable.Range(0, 8).Select(i => new LineStyle()).ToList();
@@ -107,7 +104,6 @@ public sealed class Settings
         foreach (string action in new[] { ClickAction, DoubleClickAction, MiddleClickAction })
             OneOf(action, new[] { "None", "Settings", "Calendar", "Copy" }, "点击行为");
         ParseColor(BorderColor); ParseColor(HoverBackground); ParseColor(HoverForeground);
-        if (Tooltip == null || Tooltip.Length > 1000) throw new ArgumentException("提示文字最多 1000 字。");
         if (TimeZone != "Local") TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
         if (Lines == null || Lines.Count != 8 || Lines.Any(l => l == null)) throw new ArgumentException("单行设置需要 8 个有效项目。");
         foreach (LineStyle line in Lines) line.Validate();

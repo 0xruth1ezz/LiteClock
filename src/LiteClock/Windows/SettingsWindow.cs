@@ -197,8 +197,6 @@ namespace LiteClock
             Choice(behavior, "DoubleClickAction", "双击", actionsList, false, false);
             Choice(behavior, "MiddleClickAction", "中键", actionsList, false, false);
             Hint(behavior, "右键保留设置菜单，避免更改点击动作后无法进入设置。");
-            Section(behavior, "提示文字");
-            Toggle(behavior, "TooltipEnabled", "显示鼠标悬停提示", false); Multi(behavior, "Tooltip", "提示内容", 80, false);
             Section(behavior, "配置");
             Button reset = MakeButton("恢复默认样式", delegate { draft = new Settings(); LoadAll(); QueuePreview(null, null); });
             reset.HorizontalAlignment = HorizontalAlignment.Left; behavior.Children.Add(reset);

@@ -38,6 +38,9 @@ namespace LiteClock
                 settings = new Settings { Foreground = "bad color" };
                 rejected = false; try { settings.Validate(); } catch (ArgumentException) { rejected = true; }
                 check(rejected, "invalid colors rejected");
+                var legacy = System.Text.Json.JsonSerializer.Deserialize<Settings>("{\"Width\":123,\"TooltipEnabled\":true,\"Tooltip\":null}", Store.JsonOptions);
+                legacy.Validate();
+                check(legacy.Width == 123 && !Store.Serialize(legacy).Contains("Tooltip"), "legacy tooltip fields are ignored without losing clock settings");
                 Directory.CreateDirectory(scratch); Store.DirectoryPath = scratch;
                 settings = new Settings { Width = 123, Radius = 7, ClickAction = "Calendar" };
                 settings.Lines[1].Custom = true; settings.Lines[1].Color = "#123456"; Store.Save(settings);

@@ -57,6 +57,7 @@ public sealed partial class ClockApp : Application
             if (result == 0)
             {
                 await WinUiTests.Run(this, report);
+                await MenuDismissalTests.Run(this, report);
                 await ClockBorderTests.Run(this, report);
                 await ScreenColorPickerTests.Run(this, report);
                 var baseline = Clock.Config.Copy();
@@ -74,7 +75,9 @@ public sealed partial class ClockApp : Application
                 Editor.Close();
                 if (Clock.Config.Width != baseline.Width) throw new Exception("Cancel did not restore the baseline.");
                 if ((Native.GetWindowLong(Native.Handle(Clock), -20) & 0x80020) != 0) throw new Exception("Click-through styles were not cleared.");
-                ShowCalendar(); calendar.Close(); calendar = null;
+                ShowCalendar();
+                if (arguments.Contains("--desktop-test")) await DesktopVisibilityTests.Run(this, report);
+                calendar.Close(); calendar = null;
                 File.AppendAllText(report, "PASS: WinUI settings, shared clock rendering, click-through styles, tray menu, cancel and calendar lifecycle\n");
             }
             Environment.ExitCode = result;
@@ -101,7 +104,7 @@ public sealed partial class ClockApp : Application
         ((OverlappedPresenter)Editor.AppWindow.Presenter).Restore();
         Editor.Activate(); Native.SetForegroundWindow(Native.Handle(Editor));
     }
-    public MenuFlyout CreateMenu()
+    public MenuFlyout CreateMenu(Window owner)
     {
         var menu = new MenuFlyout();
         Add(menu.Items, "设置 / 调整宽度…", ShowSettings);
@@ -114,6 +117,7 @@ public sealed partial class ClockApp : Application
         Add(menu.Items, "回到初始位置", () => Clock.ResetPosition());
         menu.Items.Add(new MenuFlyoutSeparator());
         Add(menu.Items, "退出轻时钟", Shutdown);
+        _ = new MenuDismissal(owner, menu);
         return menu;
     }
     static void Add(IList<MenuFlyoutItemBase> items, string text, Action action)
@@ -131,7 +135,7 @@ public sealed partial class ClockApp : Application
         var monitor = Native.Monitors().FirstOrDefault(m => cursor.X >= m.Bounds.Left && cursor.X < m.Bounds.Right && cursor.Y >= m.Bounds.Top && cursor.Y < m.Bounds.Bottom) ?? Native.FindMonitor("");
         int w = (int)(290 * monitor.Scale), h = (int)(240 * monitor.Scale);
         window.AppWindow.MoveAndResize(new RectInt32(Math.Clamp(cursor.X - w, monitor.Work.Left, Math.Max(monitor.Work.Left, monitor.Work.Right - w)), Math.Clamp(cursor.Y - h, monitor.Work.Top, Math.Max(monitor.Work.Top, monitor.Work.Bottom - h)), w, h));
-        trayWindow = window; var menu = CreateMenu(); bool closed = false;
+        trayWindow = window; var menu = CreateMenu(window); bool closed = false;
         void CloseMenu() { if (closed) return; closed = true; menu.Hide(); window.Close(); trayWindow = null; }
         menu.Closed += (_, _) => CloseMenu();
         window.Activated += (_, e) => { if (e.WindowActivationState == WindowActivationState.Deactivated) CloseMenu(); };
